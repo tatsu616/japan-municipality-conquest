@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>日本全国・市町村よみがな天下統一 | 全1,747市区町村制覇ゲーム</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Top HUD Header -->
+  <header class="top-hud">
+    <div class="brand-group">
+      <div class="brand-crest">統</div>
+      <div class="brand-titles">
+        <h1>日本全国・市町村よみがな天下統一</h1>
+        <span class="brand-subtitle">全1,747市区町村（漢字⇔よみがな4択）白地図占領ゲーム</span>
+      </div>
+    </div>
+
+    <div class="conquest-progress-box">
+      <div class="progress-stats-row">
+        <span class="progress-main-stat" id="hud-conquest-stat">占領: 0 / 1,747 市区町村 (0.00%)</span>
+        <span class="progress-sub-stat" id="hud-pref-stat">都道府県制覇: 0 / 47 ｜ 正解率: 100%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="hud-progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <div class="rank-pill" id="hud-rank-pill">称号: 旅の足軽</div>
+      <button class="hud-btn primary" id="btn-open-dex" title="都道府県別の制覇状況や全市町村リストを表示">
+        <span>📜 全国制覇図鑑</span>
+      </button>
+      <button class="hud-btn" id="btn-toggle-sound" title="効果音のON/OFF">
+        <span id="sound-icon">🔊 音ON</span>
+      </button>
+      <button class="hud-btn" id="btn-open-settings" title="データ管理・設定">
+        <span>⚙️ 管理</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-workspace">
+    <!-- Left Sidebar: Quiz & Strategy Controls -->
+    <aside class="command-sidebar">
+      <!-- Quiz Card -->
+      <section class="quiz-card" aria-live="polite">
+        <div class="quiz-header-badges">
+          <div>
+            <span class="pref-badge" id="quiz-pref-badge">北海道</span>
+            <span class="gun-badge" id="quiz-gun-badge"></span>
+          </div>
+          <span class="streak-badge" id="quiz-streak-badge">🔥 0連勝</span>
+        </div>
+
+        <div class="quiz-prompt-box">
+          <div class="quiz-direction-label" id="quiz-direction-label">【漢字 → よみがな】この市町村の読み方は？</div>
+          <div class="quiz-target-word" id="quiz-target-word">読み込み中...</div>
+          <div class="quiz-target-sub" id="quiz-target-sub">白地図上の黄色く光る地域を占領せよ！</div>
+        </div>
+
+        <div class="choices-grid" id="choices-grid">
+          <button class="choice-btn" data-index="0"><span class="choice-key">1</span><span class="choice-label-text">-</span></button>
+          <button class="choice-btn" data-index="1"><span class="choice-key">2</span><span class="choice-label-text">-</span></button>
+          <button class="choice-btn" data-index="2"><span class="choice-key">3</span><span class="choice-label-text">-</span></button>
+          <button class="choice-btn" data-index="3"><span class="choice-key">4</span><span class="choice-label-text">-</span></button>
+        </div>
+
+        <div class="quiz-feedback" id="quiz-feedback">
+          <span id="feedback-text">💡 キーボードの [1]〜[4] キー、または白地図クリックで直接挑戦できます</span>
+          <button class="next-btn" id="btn-skip-target" title="別の未占領地域へターゲットを変更">目標変更 ↻</button>
+        </div>
+      </section>
+
+      <!-- Mode & Strategy Configuration Card -->
+      <section class="control-card">
+        <div class="control-row">
+          <span class="control-label">出題形式</span>
+          <div class="segmented-group" id="question-mode-group">
+            <button class="seg-btn active" data-mode="mixed">両方ランダム</button>
+            <button class="seg-btn" data-mode="kanji2kana">漢字→よみ</button>
+            <button class="seg-btn" data-mode="kana2kanji">よみ→漢字</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">進軍対象</span>
+          <select class="select-input" id="select-region-filter">
+            <option value="ALL">🗾 全国すべて（1,747市区町村）</option>
+            <optgroup label="地方別ロックオン">
+              <option value="REG_HOKKAIDO">北海道地方</option>
+              <option value="REG_TOHOKU">東北地方（6県）</option>
+              <option value="REG_KANTO">関東地方（1都6県）</option>
+              <option value="REG_CHUBU">中部地方（9県）</option>
+              <option value="REG_KINKI">近畿地方（2府5県）</option>
+              <option value="REG_CHUGOKU">中国地方（5県）</option>
+              <option value="REG_SHIKOKU">四国地方（4県）</option>
+              <option value="REG_KYUSHU">九州・沖縄地方（8県）</option>
+            </optgroup>
+            <optgroup label="都道府県別ロックオン" id="optgroup-prefectures"></optgroup>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">出題順</span>
+          <select class="select-input" id="select-attack-order">
+            <option value="random" selected>🎲 ランダム出撃（全国から幅広く出題）</option>
+            <option value="neighbor">⚔️ 隣接・近隣拡大（占領地の近くへ進軍）</option>
+            <option value="north_to_south">🧭 北から南へ順番に進軍</option>
+          </select>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">地図塗色</span>
+          <select class="select-input" id="select-color-theme">
+            <option value="pref">🎨 都道府県・地方別マルチカラー</option>
+            <option value="crimson">⛩️ 戦国朱塗（真紅・黄金グラデーション）</option>
+            <option value="emerald">🌲 翠緑統一（エメラルドグリーン）</option>
+            <option value="royal">🌊 群青天下（ロイヤルブルー）</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Recent Conquered Log & Current Prefecture Progress -->
+      <section class="recent-log-box">
+        <div class="log-header">
+          <span>🚩 最近の占領地域（クリックで地図移動）</span>
+          <span class="current-pref-progress" id="current-pref-progress">北海道: 0 / 185</span>
+        </div>
+        <div class="log-items" id="recent-log-items">
+          <span style="font-size: 11px; color: #64748b;">まだ占領した地域はありません。クイズに正解して最初の領土を獲得しましょう！</span>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Right Map Stage: Interactive Blank Map of Japan -->
+    <section class="map-stage" id="map-stage">
+      <!-- Top Floating Region Camera Buttons -->
+      <div class="map-floating-top">
+        <div class="region-jump-bar">
+          <button class="jump-btn" data-jump="ALL">🗾 全国全体</button>
+          <button class="jump-btn" data-jump="TARGET">🎯 出題地点へ</button>
+          <button class="jump-btn" data-jump="HOKKAIDO">北海道</button>
+          <button class="jump-btn" data-jump="TOHOKU">東北</button>
+          <button class="jump-btn" data-jump="KANTO">関東</button>
+          <button class="jump-btn" data-jump="CHUBU">中部</button>
+          <button class="jump-btn" data-jump="KINKI">近畿</button>
+          <button class="jump-btn" data-jump="CHUGOKU_SHIKOKU">中国・四国</button>
+          <button class="jump-btn" data-jump="KYUSHU">九州</button>
+          <button class="jump-btn" data-jump="OKINAWA">沖縄・南西諸島</button>
+        </div>
+
+        <div class="region-jump-bar">
+          <label style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#e2e8f0;padding:2px 6px;cursor:pointer;">
+            <input type="checkbox" id="chk-auto-zoom" checked />
+            出題時に自動フォーカス
+          </label>
+        </div>
+      </div>
+
+      <!-- Main SVG Map -->
+      <svg id="japan-map-svg" aria-label="日本全国市区町村白地図"></svg>
+
+      <!-- Bottom-Left Map Legend -->
+      <div class="map-legend-box">
+        <span class="legend-item"><span class="legend-swatch" style="background:#ffffff;"></span>未占領（クリックで直接挑戦）</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#f59e0b;"></span>出題中の目標</span>
+        <span class="legend-item"><span class="legend-swatch" style="background:#10b981;"></span>占領済み領土</span>
+      </div>
+
+      <!-- Bottom-Right Zoom Controls -->
+      <div class="map-zoom-controls">
+        <button class="zoom-btn" id="btn-zoom-in" title="拡大">＋</button>
+        <button class="zoom-btn" id="btn-zoom-out" title="縮小">－</button>
+        <button class="zoom-btn" id="btn-zoom-target" title="出題中の地域にズーム">🎯</button>
+        <button class="zoom-btn" id="btn-zoom-reset" title="全国全体表示">🗾</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Hover Tooltip -->
+  <div class="map-tooltip" id="map-tooltip"></div>
+
+  <!-- Prefecture / Unification Fanfare Toast -->
+  <div class="conquest-toast" id="conquest-toast">🎉 都道府県制覇！</div>
+
+  <!-- Modal 1: 全国制覇図鑑 (Dex & Prefecture Progress) -->
+  <div class="modal-backdrop" id="modal-dex">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 id="dex-modal-title">📜 全国制覇図鑑・都道府県別進捗（全1,747市区町村）</h2>
+        <button class="modal-close" id="btn-close-dex">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:260px;">
+            <input type="text" id="dex-search-input" class="select-input" placeholder="🔍 市町村名または「よみがな」で検索（例：匝瑳、そうさ、沖縄）..." style="padding:8px 12px;font-size:13px;" />
+            <select id="dex-pref-select" class="select-input" style="max-width:180px;padding:8px;">
+              <option value="ALL">全都道府県（一覧）</option>
+            </select>
+          </div>
+          <div style="font-size:12px;color:#94a3b8;">
+            ※未占領の市町村カードをクリックすると、すぐその市町村のクイズに挑戦できます！
+          </div>
+        </div>
+
+        <!-- 47 Prefectures Summary Grid -->
+        <div id="dex-pref-grid-section">
+          <h3 style="font-size:13px;color:#cbd5e1;margin-bottom:8px;">都道府県別 占領率（クリックで都道府県内の市町村を表示）</h3>
+          <div class="pref-grid" id="dex-pref-grid"></div>
+        </div>
+
+        <!-- Municipality Cards Grid -->
+        <div>
+          <h3 style="font-size:13px;color:#cbd5e1;margin-bottom:8px;" id="dex-muni-section-title">市区町村一覧</h3>
+          <div class="muni-list-grid" id="dex-muni-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: データ管理・設定 & 天下統一記念モーダル -->
+  <div class="modal-backdrop" id="modal-settings">
+    <div class="modal-window" style="max-width:540px;">
+      <div class="modal-header">
+        <h2>⚙️ 戦績・セーブデータ管理</h2>
+        <button class="modal-close" id="btn-close-settings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="control-card">
+          <div style="font-size:14px;font-weight:800;color:#fde68a;">📊 現在の天下統一戦績</div>
+          <div id="settings-stats-summary" style="font-size:13px;line-height:1.8;color:#e2e8f0;"></div>
+        </div>
+
+        <div class="control-card">
+          <div style="font-size:14px;font-weight:800;color:#93c5fd;">💾 セーブデータの引き継ぎ・バックアップ</div>
+          <p style="font-size:12px;color:#94a3b8;">占領状況はブラウザに自動保存されます。テキストコードとして書き出し・読み込みも可能です。</p>
+          <textarea id="save-code-textarea" class="select-input" rows="3" placeholder="ここにセーブデータコードが表示されます / 貼り付けて復元" style="width:100%;font-family:monospace;font-size:11px;"></textarea>
+          <div style="display:flex;gap:8px;">
+            <button class="hud-btn primary" id="btn-export-save" style="flex:1;justify-content:center;">コードを書き出す</button>
+            <button class="hud-btn" id="btn-import-save" style="flex:1;justify-content:center;">コードから復元</button>
+          </div>
+        </div>
+
+        <div class="control-card" style="border-color:rgba(239,68,68,0.35);">
+          <div style="font-size:14px;font-weight:800;color:#fca5a5;">🔄 データの初期化</div>
+          <p style="font-size:12px;color:#94a3b8;">すべての占領状況をリセットして、白地図の状態からやり直します。</p>
+          <button class="hud-btn" id="btn-reset-data" style="background:rgba(239,68,68,0.2);border-color:#ef4444;color:#fecaca;justify-content:center;">
+            🗑️ 全国データをリセットして最初から始める
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="d3.min.js"></script>
+  <script src="topojson-client.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
