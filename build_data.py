@@ -13,8 +13,12 @@ with open(os.path.join(BASE_DIR, 'japan_topo_s0010.json'), 'r', encoding='utf-8'
 cities_by_code5 = {}
 cities_by_pref_name = {}
 
+northern_6 = {'01695', '01696', '01697', '01698', '01699', '01700'}
+
 for item in gov:
     c5 = item['code'][:5]
+    if c5 in northern_6:
+        continue
     if item['type'] == 'city':
         cities_by_code5[c5] = item
         cities_by_pref_name[(item['pref_name'], item['city_name'])] = item
@@ -26,7 +30,7 @@ clean_geoms = []
 for g in geoms:
     p = g.get('properties', {})
     c5 = p.get('N03_007')
-    if not c5 or not g.get('type'):
+    if not c5 or c5 in northern_6 or not g.get('type'):
         continue
     pref = p.get('N03_001')
     n3 = p.get('N03_003')
@@ -122,7 +126,7 @@ for c5, item in sorted(cities_by_code5.items(), key=lambda x: x[0]):
     })
 
 with open(os.path.join(BASE_DIR, 'data.js'), 'w', encoding='utf-8') as f:
-    f.write('// Auto-generated Japan Municipality Map & Reading Dataset (1,747 Municipalities)\n')
+    f.write('// Auto-generated Japan Municipality Map & Reading Dataset (1,741 Municipalities)\n')
     f.write('window.JAPAN_TOPO_DATA = ')
     json.dump(topo, f, ensure_ascii=False, separators=(',', ':'))
     f.write(';\nwindow.JAPAN_MUNI_LIST = ')

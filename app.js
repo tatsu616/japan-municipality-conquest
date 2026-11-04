@@ -171,24 +171,38 @@
   }
 
   // Persistence
+  const ALLOWED_QUESTION_MODES = ['mixed', 'kanji2kana', 'kana2kanji'];
+  const ALLOWED_COLOR_THEMES = ['pref', 'crimson', 'emerald', 'royal'];
+
+  function applyParsedSaveData(data) {
+    if (!data || typeof data !== 'object') return false;
+    state.conquered.clear();
+    if (Array.isArray(data.c)) {
+      data.c.forEach((code) => {
+        const strCode = String(code);
+        if (muniByCode.has(strCode)) state.conquered.add(strCode);
+      });
+    }
+    state.streak = Math.max(0, Math.floor(Number(data.s) || 0));
+    state.maxStreak = Math.max(0, Math.floor(Number(data.ms) || 0));
+    state.totalAnswered = Math.max(0, Math.floor(Number(data.ta) || 0));
+    state.totalCorrect = Math.max(0, Math.floor(Number(data.tc) || 0));
+    state.recentCodes = Array.isArray(data.rc)
+      ? data.rc.map(String).filter((code) => muniByCode.has(code)).slice(0, 14)
+      : [];
+    state.lastConqueredCode =
+      typeof data.lc === 'string' && muniByCode.has(data.lc) ? data.lc : null;
+    if (ALLOWED_QUESTION_MODES.includes(data.qm)) state.questionMode = data.qm;
+    if (ALLOWED_COLOR_THEMES.includes(data.ct)) state.colorTheme = data.ct;
+    return true;
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const data = JSON.parse(raw);
-      if (Array.isArray(data.c)) {
-        data.c.forEach((code) => {
-          if (muniByCode.has(code)) state.conquered.add(code);
-        });
-      }
-      state.streak = data.s || 0;
-      state.maxStreak = data.ms || 0;
-      state.totalAnswered = data.ta || 0;
-      state.totalCorrect = data.tc || 0;
-      state.recentCodes = Array.isArray(data.rc) ? data.rc.slice(0, 14) : [];
-      state.lastConqueredCode = data.lc || null;
-      if (data.qm) state.questionMode = data.qm;
-      if (data.ct) state.colorTheme = data.ct;
+      applyParsedSaveData(data);
     } catch (err) {
       console.warn('Failed to load save state:', err);
     }
@@ -239,7 +253,7 @@
 
   // Rank title based on conquered count
   function getRankTitle(count) {
-    if (count >= 1747) return '👑 日本全国・天下人';
+    if (count >= 1741) return '👑 日本全国・天下人';
     if (count >= 1400) return '🏯 征夷大将軍';
     if (count >= 1000) return '⚔️ 天下統一目前・大老';
     if (count >= 600) return '🛡️ 地方覇者・大大名';
@@ -1124,15 +1138,16 @@
       try {
         const jsonStr = decodeURIComponent(escape(atob(rawCode)));
         const parsed = JSON.parse(jsonStr);
-        if (parsed && Array.isArray(parsed.c)) {
-          localStorage.setItem(STORAGE_KEY, jsonStr);
-          state.conquered.clear();
-          loadState();
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.c)) {
+          applyParsedSaveData(parsed);
+          saveState();
           refreshAllMapColors();
           updateHUD();
           renderRecentLog();
           renderSettingsStats();
           alert(`セーブデータを復元しました！（占領数: ${state.conquered.size} 市区町村）`);
+        } else {
+          alert('セーブデータコードの形式が正しくありません。');
         }
       } catch (err) {
         alert('セーブデータコードの形式が正しくありません。');

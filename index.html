@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>日本全国・市町村よみがな天下統一 | 全1,747市区町村制覇ゲーム</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>日本全国・市町村よみがな天下統一 | 全1,741市区町村制覇ゲーム</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,13 +15,13 @@
       <div class="brand-crest">統</div>
       <div class="brand-titles">
         <h1>日本全国・市町村よみがな天下統一</h1>
-        <span class="brand-subtitle">全1,747市区町村（漢字⇔よみがな4択）白地図占領ゲーム</span>
+        <span class="brand-subtitle">全1,741市区町村（漢字⇔よみがな4択）白地図占領ゲーム</span>
       </div>
     </div>
 
     <div class="conquest-progress-box">
       <div class="progress-stats-row">
-        <span class="progress-main-stat" id="hud-conquest-stat">占領: 0 / 1,747 市区町村 (0.00%)</span>
+        <span class="progress-main-stat" id="hud-conquest-stat">占領: 0 / 1,741 市区町村 (0.00%)</span>
         <span class="progress-sub-stat" id="hud-pref-stat">都道府県制覇: 0 / 47 ｜ 正解率: 100%</span>
       </div>
       <div class="progress-bar-track">
@@ -88,7 +90,7 @@
         <div class="control-row">
           <span class="control-label">進軍対象</span>
           <select class="select-input" id="select-region-filter">
-            <option value="ALL">🗾 全国すべて（1,747市区町村）</option>
+            <option value="ALL">🗾 全国すべて（1,741市区町村）</option>
             <optgroup label="地方別ロックオン">
               <option value="REG_HOKKAIDO">北海道地方</option>
               <option value="REG_TOHOKU">東北地方（6県）</option>
@@ -127,7 +129,7 @@
       <section class="recent-log-box">
         <div class="log-header">
           <span>🚩 最近の占領地域（クリックで地図移動）</span>
-          <span class="current-pref-progress" id="current-pref-progress">北海道: 0 / 185</span>
+          <span class="current-pref-progress" id="current-pref-progress">北海道: 0 / 179</span>
         </div>
         <div class="log-items" id="recent-log-items">
           <span style="font-size: 11px; color: #64748b;">まだ占領した地域はありません。クイズに正解して最初の領土を獲得しましょう！</span>
@@ -190,7 +192,7 @@
   <div class="modal-backdrop" id="modal-dex">
     <div class="modal-window">
       <div class="modal-header">
-        <h2 id="dex-modal-title">📜 全国制覇図鑑・都道府県別進捗（全1,747市区町村）</h2>
+        <h2 id="dex-modal-title">📜 全国制覇図鑑・都道府県別進捗（全1,741市区町村）</h2>
         <button class="modal-close" id="btn-close-dex">✕</button>
       </div>
       <div class="modal-body">
